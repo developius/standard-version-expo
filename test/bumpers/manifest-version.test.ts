@@ -1,5 +1,6 @@
 import * as stub from '../stub';
 import { readVersion, writeVersion } from '../../src/bumpers/manifest-version';
+import { parse } from '../../src/expo';
 
 describe('readVersion', () => {
 	it('returns version from manifest', () => {
@@ -29,5 +30,23 @@ describe('writeVersion', () => {
 		const modified = writeVersion(JSON.stringify(manifest), '1.2.3');
 
 		expect(readVersion(modified)).toBe('1.2.3');
+		expect(parse(modified).expo.runtimeVersion).toBe('1.2.3');
 	});
+
+	it('returns manifest with added runtimeVersion when a policy is not specified', () => {
+		const manifest = stub.manifest();
+		manifest.expo.runtimeVersion = "1.2.0";
+
+		const modified = writeVersion(JSON.stringify(manifest), '1.2.3');
+		expect(parse(modified).expo.runtimeVersion).toBe('1.2.3');
+	})
+
+	it('returns manifest with added runtimeVersion when a policy is specified', () => {
+		const manifest = stub.manifest();
+		// @ts-expect-error
+		manifest.expo.runtimeVersion = { policy: "nativeVersion" };
+
+		const modified = writeVersion(JSON.stringify(manifest), '1.2.3');
+		expect(parse(modified).expo.runtimeVersion).toStrictEqual({ policy: "nativeVersion" });
+	})
 });

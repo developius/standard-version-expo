@@ -9,11 +9,15 @@ export const readVersion: VersionReader = (contents) => (
 );
 
 /**
- * Write the manifest version to the `expo.version` property.
+ * Write the manifest version to the `expo.version` and `expo.runtimeVersion` properties.
  */
 export const writeVersion: VersionWriter = (contents, version) => {
 	const manifest = parse(contents);
 	manifest.expo.version = version;
+
+	if (typeof manifest.expo.runtimeVersion !== "object") {
+		manifest.expo.runtimeVersion = version;
+	}
 
 	return serialize(manifest, contents);
 };
